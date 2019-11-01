@@ -1,10 +1,10 @@
 var lfm_route = location.origin + location.pathname;
 var show_list;
 var sort_type = 'alphabetic';
-var multi_selection_enabled = false;
-var selected = JSON.parse($("#selected").val());
-var arr_objects = [];
-var items = [];
+var selected = JSON.parse($("#selected").val()); // selected urls
+var multi_selection_enabled = selected.length > 1;
+var arr_objects = []; // selected items
+var items = []; // all items shown on the page
 
 $.fn.fab = function (options) {
   var menu = this;
@@ -179,6 +179,7 @@ function clearSelected () {
 
 function updateSelectedStyle() {
   getSelectedItems();
+  $('[data-url] .square').removeClass('selected');
   arr_objects.forEach(function (item) {
     $('[data-url="' + item.url + '"]')
       .find('.square')
@@ -202,7 +203,7 @@ function getSelectedItems() {
 
 function toggleActions() {
   var one_selected = arr_objects.length === 1;
-  var many_selected = arr_objects.length >= 1;
+  var many_selected = arr_objects.length > 1;
   var only_image = arr_objects
     .filter(function (item) { return !item.is_image; })
     .length === 0;
@@ -392,7 +393,6 @@ function loadItems() {
       setOpenFolders();
       updateSelectedStyle()
       loading(false);
-      toggleActions();
     });
 }
 
@@ -648,8 +648,7 @@ function usingWysiwygEditor() {
 function defaultParameters() {
   return {
     working_dir: $('#working_dir').val(),
-    type: $('#type').val(),
-    selected: JSON.parse($("#selected").val())
+    type: $('#type').val()
   };
 }
 
