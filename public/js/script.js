@@ -91,6 +91,10 @@ $(document).ready(function () {
   if (usingWysiwygEditor()) {
     $('#multi_selection_toggle').hide();
   }
+
+  $('#multi_selection_toggle i')
+    .toggleClass('fa-times', multi_selection_enabled)
+    .toggleClass('fa-check-double', !multi_selection_enabled);
 });
 
 // ======================
@@ -203,7 +207,7 @@ function getSelectedItems() {
 
 function toggleActions() {
   var one_selected = arr_objects.length === 1;
-  var many_selected = arr_objects.length > 1;
+  var many_selected = arr_objects.length >= 1;
   var only_image = arr_objects
     .filter(function (item) { return !item.is_image; })
     .length === 0;
