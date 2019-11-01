@@ -2,7 +2,8 @@ var lfm_route = location.origin + location.pathname;
 var show_list;
 var sort_type = 'alphabetic';
 var multi_selection_enabled = false;
-var selected = [];
+var selected = JSON.parse($("#selected").val());
+var arr_objects = [];
 var items = [];
 
 $.fn.fab = function (options) {
@@ -157,7 +158,7 @@ function toggleSelected (e) {
     selected = [];
   }
 
-  var sequence = $(e.target).closest('a').data('id');
+  var sequence = $(e.target).closest('a').data('url');
   var element_index = selected.indexOf(sequence);
   if (element_index === -1) {
     selected.push(sequence);
@@ -177,33 +178,35 @@ function clearSelected () {
 }
 
 function updateSelectedStyle() {
-  items.forEach(function (item, index) {
-    $('[data-id=' + index + ']')
+  getSelectedItems();
+  arr_objects.forEach(function (item) {
+    $('[data-url="' + item.url + '"]')
       .find('.square')
-      .toggleClass('selected', selected.indexOf(index) > -1);
+      .toggleClass('selected', true);
   });
   toggleActions();
 }
 
-function getOneSelectedElement(orderOfItem) {
-  var index = orderOfItem !== undefined ? orderOfItem : selected[0];
-  return items[index];
+function getOneSelectedElement(url) {
+    var index = items.findIndex((item) => item.url == url);
+    return index !== null ? items[index] : items[0]
 }
 
 function getSelectedItems() {
-  return selected.reduce(function (arr_objects, id) {
-    arr_objects.push(getOneSelectedElement(id));
-    return arr_objects
-  }, []);
+  arr_objects = []
+  selected.forEach(function (url) {
+    arr_objects.push(getOneSelectedElement(url));
+  });
+  return arr_objects;
 }
 
 function toggleActions() {
-  var one_selected = selected.length === 1;
-  var many_selected = selected.length >= 1;
-  var only_image = getSelectedItems()
+  var one_selected = arr_objects.length === 1;
+  var many_selected = arr_objects.length >= 1;
+  var only_image = arr_objects
     .filter(function (item) { return !item.is_image; })
     .length === 0;
-  var only_file = getSelectedItems()
+  var only_file = arr_objects
     .filter(function (item) { return !item.is_file; })
     .length === 0;
 
@@ -313,7 +316,6 @@ function loadItems() {
   loading(true);
   performLfmRequest('jsonitems', {show_list: show_list, sort_type: sort_type}, 'html')
     .done(function (data) {
-      selected = [];
       var response = JSON.parse(data);
       var working_dir = response.working_dir;
       items = response.items;
@@ -328,6 +330,7 @@ function loadItems() {
           var template = $('#item-template').clone()
             .removeAttr('id class')
             .attr('data-id', index)
+            .attr('data-url', item.url)
             .click(toggleSelected)
             .dblclick(function (e) {
               if (item.is_file) {
@@ -387,6 +390,7 @@ function loadItems() {
       $('#to-previous').toggleClass('d-none invisible-lg', atRootFolder);
       $('#show_tree').toggleClass('d-none', !atRootFolder).toggleClass('d-block', atRootFolder);
       setOpenFolders();
+      updateSelectedStyle()
       loading(false);
       toggleActions();
     });
@@ -644,7 +648,8 @@ function usingWysiwygEditor() {
 function defaultParameters() {
   return {
     working_dir: $('#working_dir').val(),
-    type: $('#type').val()
+    type: $('#type').val(),
+    selected: JSON.parse($("#selected").val())
   };
 }
 
