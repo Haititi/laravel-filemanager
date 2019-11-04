@@ -55,7 +55,9 @@ class CropController extends LfmController
 
             // make new thumbnail
             Image::make($crop_path)
-                ->fit(config('lfm.thumb_img_width', 200), config('lfm.thumb_img_height', 200))
+                ->resize(config('lfm.thumb_img_width', 200), config('lfm.thumb_img_height', 200), function ($constraint) {
+                    $constraint->aspectRatio();
+                })
                 ->save(parent::getThumbPath(parent::getName($crop_path)));
         }
 

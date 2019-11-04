@@ -183,7 +183,9 @@ class UploadController extends LfmController
 
         // create thumb image
         Image::make(parent::getCurrentPath($new_filename))
-            ->fit(config('lfm.thumb_img_width', 200), config('lfm.thumb_img_height', 200))
+            ->resize(config('lfm.thumb_img_width', 200), config('lfm.thumb_img_height', 200), function ($constraint) {
+                $constraint->aspectRatio();
+            })
             ->save(parent::getThumbPath($new_filename));
     }
 
